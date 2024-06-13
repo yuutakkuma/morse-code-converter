@@ -2,6 +2,7 @@
 node_modules
 .gitignore
 .prettierignore
+.eslintignore
 package.json
 tsconfig.json
 yarn.lock

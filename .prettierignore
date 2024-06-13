@@ -1,0 +1,7 @@
+.expo
+node_modules
+.gitignore
+.prettierignore
+package.json
+tsconfig.json
+yarn.lock

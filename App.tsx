@@ -7,9 +7,17 @@ import {
   TextInput,
   Keyboard,
   TouchableOpacity,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  Alert
 } from 'react-native'
+import * as Clipboard from 'expo-clipboard'
+import { useSetAtom } from 'jotai'
+// state
+import { snackBarAtom } from './src/state/snackBarAtom'
+// constants
 import { MORSE_JA } from './morse'
+// components
+import { SnackBar } from './src/snackBar'
 
 const useMorseConverter = () => {
   const [convertedText, setConverted] = useState<string>('')
@@ -37,8 +45,11 @@ const useMorseConverter = () => {
 
 export default function App() {
   const [text, setText] = useState<string>('')
-  const [isDoneButton, setIsDoneButton] = useState<boolean>(false)
   const { convertedText, converter } = useMorseConverter()
+  // local state
+  const [isDoneButton, setIsDoneButton] = useState<boolean>(false)
+  // jotai
+  const setSnackBar = useSetAtom(snackBarAtom)
 
   const changeText = (value: string) => {
     setText(value)
@@ -51,6 +62,15 @@ export default function App() {
 
   const dismissKeybord = () => {
     Keyboard.dismiss()
+  }
+
+  const copy = async () => {
+    try {
+      await Clipboard.setStringAsync(convertedText)
+      setSnackBar(true)
+    } catch {
+      Alert.alert('エラー', 'コピーに失敗しました')
+    }
   }
 
   useEffect(() => {
@@ -71,8 +91,14 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
+        <SnackBar />
         <Text>{convertedText}</Text>
         <KeyboardAvoidingView style={styles.keyboardAvoidingView} behavior="padding" keyboardVerticalOffset={60}>
+          {convertedText.length ? (
+            <TouchableOpacity style={styles.copyButton} onPress={copy}>
+              <Text>コピー</Text>
+            </TouchableOpacity>
+          ) : null}
           {text.length ? (
             <TouchableOpacity style={styles.clearButton} onPress={resetText}>
               <Text>クリア</Text>
@@ -135,6 +161,10 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     alignSelf: 'flex-end',
+    padding: 10
+  },
+  copyButton: {
+    alignSelf: 'flex-start',
     padding: 10
   }
 })
